@@ -12,6 +12,8 @@ This repo contains a command interpreter for the Holberton Airbnb project, as we
 * Place
 * Review
 
+* 
+
 ### Commands:
 * create - create an object
 * show - show an object (based on id)
