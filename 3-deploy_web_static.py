@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from fabric import task
 from fabric.connection import Connection
 from invoke import run as local_run  # For local commands
