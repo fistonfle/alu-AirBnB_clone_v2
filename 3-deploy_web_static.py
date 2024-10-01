@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-
 from fabric import task
 from fabric.connection import Connection
-from invoke import run as local_run  # For local commands
+from invoke import run as local_run  
 from datetime import datetime
 from os.path import exists, isdir
 
@@ -12,11 +11,21 @@ user = 'ubuntu'
 
 @task
 def do_pack(c):
-    """Generates a tgz archive"""
+    """
+    Generates a .tgz archive of the 'web_static' folder.
+    Adds a file 'my_index.html' for testing purposes.
+    
+    :param c: Fabric connection context
+    :return: The archive path if successful, None otherwise
+    """
     try:
         date = datetime.now().strftime("%Y%m%d%H%M%S")
         if not isdir("versions"):
             local_run("mkdir versions")
+        
+        # Add 'my_index.html' file for deployment
+        # local_run("echo '<h1>My Test Index</h1>' > web_static/my_index.html")
+        
         file_name = f"versions/web_static_{date}.tgz"
         local_run(f"tar -cvzf {file_name} web_static")
         print(f"Archive created: {file_name}")
@@ -27,7 +36,13 @@ def do_pack(c):
 
 @task
 def do_deploy(c, archive_path):
-    """Distributes an archive to the web servers"""
+    """
+    Distributes an archive to the web servers.
+    
+    :param c: Fabric connection context
+    :param archive_path: The path to the archive file
+    :return: True if deployment succeeds, False otherwise
+    """
     if not exists(archive_path):
         print(f"Archive path does not exist: {archive_path}")
         return False
@@ -35,6 +50,7 @@ def do_deploy(c, archive_path):
         file_n = archive_path.split("/")[-1]
         no_ext = file_n.split(".")[0]
         path = "/data/web_static/releases/"
+        
         c.put(archive_path, '/tmp/')
         c.run(f'mkdir -p {path}{no_ext}/')
         c.run(f'tar -xzf /tmp/{file_n} -C {path}{no_ext}/')
@@ -51,7 +67,12 @@ def do_deploy(c, archive_path):
 
 @task
 def deploy(c):
-    """Creates and distributes an archive to the web servers"""
+    """
+    Creates and deploys an archive to the web servers.
+    
+    :param c: Fabric connection context
+    :return: True if deployment succeeds, False otherwise
+    """
     archive_path = do_pack(c)
     if not archive_path:
         print("do_pack failed")
